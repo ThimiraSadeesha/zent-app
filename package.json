@@ -3,10 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
+    "dev:development": "cross-env NEXT_PUBLIC_ENV=development next dev --turbo",
+    "dev:qa": "cross-env NEXT_PUBLIC_ENV=qa next dev --turbo",
+    "dev:production": "cross-env NEXT_PUBLIC_ENV=production next dev --turbo",
     "build": "next build",
+    "build:development": "cross-env NEXT_PUBLIC_ENV=development next build",
+    "build:qa": "cross-env NEXT_PUBLIC_ENV=qa next build",
+    "build:production": "cross-env NEXT_PUBLIC_ENV=production next build",
     "start": "next start",
-    "lint": "eslint"
+    "start:development": "cross-env NEXT_PUBLIC_ENV=development next start",
+    "start:qa": "cross-env NEXT_PUBLIC_ENV=qa next start",
+    "start:production": "cross-env NEXT_PUBLIC_ENV=production next start",
+    "lint": "next lint",
+    "env:check": "node scripts/check-env.js"
   },
   "dependencies": {
     "next": "16.1.4",
