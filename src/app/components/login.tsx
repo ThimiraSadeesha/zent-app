@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 
+// ✅ Define props so TypeScript knows about className
 interface BackgroundBeamsProps {
     className?: string;
 }
@@ -73,67 +74,113 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                         width: 30rem;
                         border-radius: 0.375rem;
                         display: flex;
+                        flex-direction: column;
                         align-items: center;
                         justify-content: center;
                         z-index: 10;
-                        background: rgba(0, 0, 0, 0.6);
-                        backdrop-filter: blur(10px);
                     }
 
                     .content-wrapper {
-                        width: 100%;
-                        padding: 1.5rem;
+                        max-width: 42rem;
+                        margin: 0 auto;
+                        padding: 1rem;
                     }
 
                     .title {
+                        position: relative;
+                        z-index: 10;
+                        font-size: 1.125rem;
                         text-align: center;
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        background: linear-gradient(to bottom, #e5e5e5, #737373);
+                        font-weight: bold;
+                        background: linear-gradient(
+                                to bottom,
+                                rgb(229, 229, 229),
+                                rgb(115, 115, 115)
+                        );
                         -webkit-background-clip: text;
                         background-clip: text;
                         color: transparent;
+                        margin: 0 0 0.5rem 0;
                     }
 
                     .description {
+                        color: rgb(115, 115, 115);
+                        max-width: 32rem;
+                        margin: 0.75rem auto;
+                        font-size: 0.9rem;
+                        line-height: 1.5;
                         text-align: center;
-                        color: #737373;
-                        margin: 1rem 0;
+                        position: relative;
+                        z-index: 10;
                     }
 
                     .input-field {
-                        width: 100%;
-                        margin-top: 0.75rem;
-                        padding: 0.75rem 1rem;
                         border-radius: 0.5rem;
-                        border: 1px solid #262626;
-                        background: #0a0a0a;
+                        border: 1px solid rgb(38, 38, 38);
+                        width: 100%;
+                        position: relative;
+                        z-index: 10;
+                        margin-top: 1rem;
+                        background-color: rgb(10, 10, 10);
                         color: white;
+                        padding: 0.75rem 1rem;
+                        font-size: 0.875rem;
+                    }
+
+                    .input-field::placeholder {
+                        color: rgb(64, 64, 64);
+                    }
+
+                    .input-field:focus {
+                        outline: none;
+                        border-color: rgb(20, 184, 166);
+                        box-shadow: 0 0 0 2px rgb(20, 184, 166);
+                    }
+
+                    @media (min-width: 768px) {
+                        .title {
+                            font-size: 4.5rem;
+                        }
                     }
 
                     .login-button {
-                        width: 100%;
-                        margin-top: 1rem;
-                        padding: 0.75rem;
                         border-radius: 0.5rem;
-                        border: 1px solid #14b8a6;
-                        background: #14b8a6;
-                        color: #0a0a0a;
+                        border: 1px solid rgb(20, 184, 166);
+                        width: 100%;
+                        position: relative;
+                        z-index: 10;
+                        margin-top: 1rem;
+                        background-color: rgb(20, 184, 166);
+                        color: rgb(10, 10, 10);
+                        padding: 0.75rem 1rem;
+                        font-size: 0.875rem;
                         font-weight: 600;
                         cursor: pointer;
+                        transition: all 0.2s ease-in-out;
+                    }
+
+                    .login-button:hover {
+                        background-color: rgb(13, 148, 136);
+                    }
+
+                    .login-button:focus {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgb(20, 184, 166);
                     }
                 `}</style>
 
                 <div className={`beams-container ${className}`}>
                     <svg
                         className="beams-svg"
+                        width="100%"
+                        height="100%"
                         viewBox="0 0 696 316"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                     >
                         {paths.map((path, index) => (
                             <path
-                                key={index}
+                                key={`path-${index}`}
                                 d={path}
                                 stroke={`url(#linearGradient-${index})`}
                                 className="animated-path"
@@ -146,8 +193,8 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
 
                                 return (
                                     <linearGradient
-                                        key={index}
                                         id={`linearGradient-${index}`}
+                                        key={`gradient-${index}`}
                                         x1="0%"
                                         y1="0%"
                                         x2="100%"
@@ -162,8 +209,33 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                                                 repeatCount="indefinite"
                                             />
                                         </stop>
-                                        <stop stopColor="#6344F5" />
-                                        <stop stopColor="#AE48FF" stopOpacity="0" />
+                                        <stop stopColor="#18CCFC">
+                                            <animate
+                                                attributeName="offset"
+                                                values="0;0.3;0"
+                                                dur={`${duration}s`}
+                                                begin={`${delay}s`}
+                                                repeatCount="indefinite"
+                                            />
+                                        </stop>
+                                        <stop offset="32.5%" stopColor="#6344F5">
+                                            <animate
+                                                attributeName="offset"
+                                                values="0.325;0.625;0.325"
+                                                dur={`${duration}s`}
+                                                begin={`${delay}s`}
+                                                repeatCount="indefinite"
+                                            />
+                                        </stop>
+                                        <stop offset="100%" stopColor="#AE48FF" stopOpacity="0">
+                                            <animate
+                                                attributeName="offset"
+                                                values="1;1;1"
+                                                dur={`${duration}s`}
+                                                begin={`${delay}s`}
+                                                repeatCount="indefinite"
+                                            />
+                                        </stop>
                                     </linearGradient>
                                 );
                             })}
@@ -174,17 +246,12 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                         <div className="content-wrapper">
                             <h1 className="title">Z E N T</h1>
                             <p className="description">
-                                Monitor servers, track resources, and manage Docker containers.
+                                Monitor servers, track resources, and manage Docker containers in real time with Zent.
                             </p>
-
-                            <input className="input-field" placeholder="Host" />
-                            <input className="input-field" placeholder="Username" />
-                            <input
-                                className="input-field"
-                                type="password"
-                                placeholder="Password"
-                            />
-                            <input className="input-field" placeholder="Port" />
+                            <input type="text" placeholder="Host" className="input-field" />
+                            <input type="text" placeholder="Username" className="input-field" />
+                            <input type="password" placeholder="Password" className="input-field" />
+                            <input type="text" placeholder="Port" className="input-field" />
 
                             <button className="login-button">Login</button>
                         </div>
