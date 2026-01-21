@@ -2,7 +2,6 @@
 
 import React, { useMemo } from "react";
 
-// ✅ Define props so TypeScript knows about className
 interface BackgroundBeamsProps {
     className?: string;
 }
@@ -67,31 +66,29 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                     }
 
                     .demo-container {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1rem;
-                        height: 40rem;
-                        width: 30rem;
-                        border-radius: 0.375rem;
+                        position: relative;
+                        width: 100%;
+                        max-width: 28rem;
+                        padding: 1.5rem;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
                         z-index: 10;
+                        margin: 0 auto;
                     }
 
                     .content-wrapper {
-                        max-width: 42rem;
-                        margin: 0 auto;
-                        padding: 1rem;
+                        width: 100%;
                     }
 
                     .title {
                         position: relative;
                         z-index: 10;
-                        font-size: 1.125rem;
+                        font-size: 2.5rem;
                         text-align: center;
                         font-weight: bold;
+                        letter-spacing: 0.3em;
                         background: linear-gradient(
                                 to bottom,
                                 rgb(229, 229, 229),
@@ -100,14 +97,13 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                         -webkit-background-clip: text;
                         background-clip: text;
                         color: transparent;
-                        margin: 0 0 0.5rem 0;
+                        margin: 0 0 1rem 0;
                     }
 
                     .description {
                         color: rgb(115, 115, 115);
-                        max-width: 32rem;
-                        margin: 0.75rem auto;
-                        font-size: 0.9rem;
+                        margin: 0 auto 1.5rem;
+                        font-size: 0.875rem;
                         line-height: 1.5;
                         text-align: center;
                         position: relative;
@@ -120,7 +116,7 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                         width: 100%;
                         position: relative;
                         z-index: 10;
-                        margin-top: 1rem;
+                        margin-top: 0.75rem;
                         background-color: rgb(10, 10, 10);
                         color: white;
                         padding: 0.75rem 1rem;
@@ -134,13 +130,7 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                     .input-field:focus {
                         outline: none;
                         border-color: rgb(20, 184, 166);
-                        box-shadow: 0 0 0 2px rgb(20, 184, 166);
-                    }
-
-                    @media (min-width: 768px) {
-                        .title {
-                            font-size: 4.5rem;
-                        }
+                        box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.3);
                     }
 
                     .login-button {
@@ -157,15 +147,95 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
                         font-weight: 600;
                         cursor: pointer;
                         transition: all 0.2s ease-in-out;
+                        border: none;
                     }
 
                     .login-button:hover {
                         background-color: rgb(13, 148, 136);
+                        transform: translateY(-1px);
+                    }
+
+                    .login-button:active {
+                        transform: translateY(0);
                     }
 
                     .login-button:focus {
                         outline: none;
-                        box-shadow: 0 0 0 2px rgb(20, 184, 166);
+                        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.3);
+                    }
+
+                    /* Tablet (768px and up) */
+                    @media (min-width: 768px) {
+                        .demo-container {
+                            position: absolute;
+                            top: 2rem;
+                            right: 2rem;
+                            max-width: 26rem;
+                            padding: 2rem;
+                            margin: 0;
+                        }
+
+                        .title {
+                            font-size: 3.5rem;
+                        }
+
+                        .description {
+                            font-size: 0.9rem;
+                        }
+
+                        .input-field {
+                            margin-top: 0.875rem;
+                        }
+
+                        .login-button {
+                            margin-top: 1.25rem;
+                        }
+                    }
+
+                    /* Desktop (1024px and up) */
+                    @media (min-width: 1024px) {
+                        .demo-container {
+                            max-width: 30rem;
+                        }
+
+                        .title {
+                            font-size: 4.5rem;
+                        }
+
+                        .description {
+                            font-size: 1rem;
+                        }
+
+                        .input-field {
+                            margin-top: 1rem;
+                        }
+                    }
+
+                    /* Mobile landscape */
+                    @media (max-height: 600px) and (orientation: landscape) {
+                        .title {
+                            font-size: 2rem;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        .description {
+                            font-size: 0.8rem;
+                            margin-bottom: 1rem;
+                        }
+
+                        .input-field {
+                            padding: 0.5rem 0.75rem;
+                            margin-top: 0.5rem;
+                        }
+
+                        .login-button {
+                            padding: 0.5rem 0.75rem;
+                            margin-top: 0.75rem;
+                        }
+
+                        .demo-container {
+                            padding: 1rem;
+                        }
                     }
                 `}</style>
 
@@ -244,7 +314,7 @@ export const BackgroundBeams = React.memo<BackgroundBeamsProps>(
 
                     <div className="demo-container">
                         <div className="content-wrapper">
-                            <h1 className="title">Z E N T</h1>
+                            <h1 className="title">ZENT</h1>
                             <p className="description">
                                 Monitor servers, track resources, and manage Docker containers in real time with Zent.
                             </p>
