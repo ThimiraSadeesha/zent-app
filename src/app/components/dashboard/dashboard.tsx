@@ -9,7 +9,7 @@ interface DashboardProps {
     title?: string;
 }
 
-export const Dashboard = React.memo<React.FC<DashboardProps>>(() => {
+export const Dashboard = React.memo((props: DashboardProps) => {
     const [isLoggedIn, setIsLoggedIn] = useState(true);
 
     const systemData = {
