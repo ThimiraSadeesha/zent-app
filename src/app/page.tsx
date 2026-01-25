@@ -5,7 +5,7 @@ import { BackgroundBeams } from "./components/login";
 export default function Home() {
   return (
     <div className={styles.page}>
-      <BackgroundBeams/>
+        <BackgroundBeams/>
     </div>
   );
 }
