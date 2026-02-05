@@ -3,25 +3,42 @@
 import React, { useState } from "react";
 import {BackgroundBeams} from "@/app/components/background/background-beams";
 import { useRouter } from "next/navigation";
+import {serverAPI} from "@/lib/services/server.service";
 
 
 
 export function BackgroundBeamsDemo() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [form, setForm] = useState({
         host: "",
         username: "",
         password: "",
-        port: "",
+        port: "22",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleLogin = () => {
-        console.log("Logging in with:", form);
-        router.push("/dashboard"); // ✅ navigate to dashboard
+    const handleLogin = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            await serverAPI.login({
+                host: form.host,
+                username: form.username,
+                password: form.password,
+                port: Number(form.port),
+            });
+
+            router.push("/dashboard");
+        } catch (err: any) {
+            setError(err.message || "Login failed");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleClear = () => {
