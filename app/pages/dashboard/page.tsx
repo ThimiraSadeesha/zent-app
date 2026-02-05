@@ -26,7 +26,7 @@ const dashbaord = () => {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
-                        Z E N T Dashboard
+                        Z E N T
                     </h1>
                     <button
                         onClick={handleLogout}
@@ -60,11 +60,9 @@ const dashbaord = () => {
                     ))}
                 </div>
 
-                {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* System Resources */}
                     <div className="p-6 rounded-lg bg-neutral-900/50 border border-neutral-800 backdrop-blur-sm">
-                        <h2 className="text-xl font-semibold text-neutral-200 mb-4">System Resources</h2>
+                        <h2 className="text-xl font-semibold text-neutral-200 mb-4">System</h2>
                         <div className="space-y-4">
                             <SystemResourceCard title="CPU Usage" usage={45} />
                             <SystemResourceCard title="Memory Usage" usage={68} />
@@ -74,7 +72,7 @@ const dashbaord = () => {
 
                     {/* Docker Containers */}
                     <div className="p-6 rounded-lg bg-neutral-900/50 border border-neutral-800 backdrop-blur-sm">
-                        <h2 className="text-xl font-semibold text-neutral-200 mb-4">Docker Containers</h2>
+                        <h2 className="text-xl font-semibold text-neutral-200 mb-4">Docker</h2>
                         <div className="space-y-3">
                             <DockerContainerCard name="nginx-proxy" status="Running" />
                             <DockerContainerCard name="postgres-db" status="Running" />
@@ -83,7 +81,6 @@ const dashbaord = () => {
                     </div>
                 </div>
             </div>
-
             <BackgroundBeams />
         </div>
     );

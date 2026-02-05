@@ -212,7 +212,7 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
-                            Z E N T Dashboard
+                            Z E N T
                         </h1>
                         <p className="text-neutral-400 mt-2">Monitor your server resources and containers in real-time</p>
                     </div>
@@ -226,7 +226,7 @@ const Dashboard = () => {
 
                 {/* System Resources */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-semibold text-neutral-200 mb-4">System Resources</h2>
+                    {/*<h2 className="text-2xl font-semibold text-neutral-200 mb-4">System</h2>*/}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <SystemResourceCard
                             title="RAM"
@@ -247,9 +247,8 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* System Information */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-semibold text-neutral-200 mb-4">System Information</h2>
+                    {/*<h2 className="text-2xl font-semibold text-neutral-200 mb-4">System</h2>*/}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <SystemInfoCard
                             title="Operating System"
@@ -269,14 +268,12 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Docker Containers - Collapsible */}
                 <CollapsibleSection
-                    title="Docker Containers"
+                    title="Docker"
                     icon="🐳"
                     badge={`${dockerData.running_containers} / ${dockerData.total_containers} Running`}
                     defaultExpanded={true}
                 >
-                    {/* Docker Status Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="p-4 rounded-lg bg-neutral-800/50">
                             <p className="text-neutral-400 text-sm">Docker Status</p>
@@ -294,7 +291,6 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Container Cards Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {dockerData.containers.map((container) => (
                             <DockerDetailCard

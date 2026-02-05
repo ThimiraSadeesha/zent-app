@@ -6,7 +6,6 @@ interface SystemResourceCardProps {
 }
 
 const SystemResourceCard: React.FC<SystemResourceCardProps> = ({ title, usage, used, total }) => {
-    // Determine color based on usage
     const getColor = () => {
         if (usage >= 80) return "text-red-500";
         if (usage >= 60) return "text-yellow-500";
