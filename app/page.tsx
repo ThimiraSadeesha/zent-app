@@ -1,5 +1,5 @@
-import Image from "next/image";
 import {BackgroundBeamsDemo} from "@/app/pages/background/background";
+
 
 export default function Home() {
     return (

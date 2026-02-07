@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import { BackgroundBeams } from "@/app/components/background/background-beams";
 import { useRouter } from "next/navigation";
 import { serverAPI } from "@/lib/services/server.service";
-import {Loading} from "@/app/components/shared/loading/loading";
-import {Notification} from "@/app/components/shared/notification/notification";
+import { Loading } from "@/app/components/shared/loading/loading";
+import { Notification } from "@/app/components/shared/notification/notification";
 
 export function BackgroundBeamsDemo() {
     const router = useRouter();
     const [connecting, setConnecting] = useState(false);
     const [form, setForm] = useState({
         host: "",
-        username: "",
-        password: "",
+        username: " ",
+        password: " ",
         port: "22",
     });
 
@@ -40,31 +40,51 @@ export function BackgroundBeamsDemo() {
     };
 
     const handleLogin = async () => {
-        // Validation
         if (!form.host || !form.username || !form.password) {
-            showNotification("warning", "Please fill in all fields");
+            showNotification("warning", "Please fill in all required fields");
+            return;
+        }
+
+        const portNum = Number(form.port);
+        if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+            showNotification("error", "Please enter a valid port number (1-65535)");
             return;
         }
 
         setConnecting(true);
 
         try {
-            await serverAPI.login({
+            const response = await serverAPI.login({
                 host: form.host,
                 username: form.username,
                 password: form.password,
-                port: Number(form.port),
+                port: portNum,
             });
+            if (response?.status === 200) {
+                const serverInfo = response.data;
+                localStorage.setItem("serverInfo", JSON.stringify(serverInfo));
 
-            showNotification("success", "Connected successfully!");
+                showNotification("success", "Connected successfully!");
 
-            // Delay navigation to show success message
-            setTimeout(() => {
                 router.push("/dashboard");
-            }, 1000);
+            } else {
+                throw new Error("Server connection failed");
+            }
         } catch (err: any) {
+            const errorMessage =
+                err?.response?.data?.message ||
+                err?.message ||
+                "Failed to connect to server";
+
+            showNotification("error", errorMessage);
+        } finally {
+            // ✅ Always stop loading
             setConnecting(false);
-            showNotification("error", err.message || "Login failed");
+        }
+    };
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleLogin();
         }
     };
 
@@ -100,7 +120,7 @@ export function BackgroundBeamsDemo() {
                         real time.
                     </p>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" onKeyPress={handleKeyPress}>
                         <input
                             type="text"
                             name="host"
@@ -128,7 +148,7 @@ export function BackgroundBeamsDemo() {
                         <input
                             type="text"
                             name="port"
-                            placeholder="Port"
+                            placeholder="Port (default: 22)"
                             value={form.port}
                             onChange={handleChange}
                             className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-3 text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -145,9 +165,9 @@ export function BackgroundBeamsDemo() {
                         <button
                             onClick={handleLogin}
                             disabled={connecting}
-                            className="w-[calc(50%-0.375rem)] px-6 py-2 rounded-lg bg-teal-500 text-black font-semibold hover:bg-teal-400 transition disabled:opacity-60"
+                            className="w-[calc(50%-0.375rem)] px-6 py-2 rounded-lg bg-teal-500 text-black font-semibold hover:bg-teal-400 transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Login
+                            {connecting ? "Connecting..." : "Login"}
                         </button>
                     </div>
                 </div>

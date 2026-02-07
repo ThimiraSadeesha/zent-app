@@ -7,9 +7,7 @@ export class DockerService extends APIRequest {
     }
 
     getStats() {
-        return this.get({
-            endpoint: "stats",
-        });
+        return this.get<any>({ endpoint: "stats" });
     }
 
     startContainer(containerName: string) {
