@@ -72,8 +72,50 @@ var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$g
 ;
 ;
 const metadata = {
-    title: "ZENT | Server Monitoring ",
-    description: "Monitor your server resources and containers in real-time"
+    title: "ZENT | Server Monitoring & Docker Management",
+    description: "Monitor server resources, manage Docker containers, and control remote servers via SSH in real time. A lightweight server management dashboard by Lumiraq.",
+    keywords: [
+        "server monitoring",
+        "docker management",
+        "SSH management",
+        "server manager",
+        "monitor server",
+        "manage docker containers",
+        "docker dashboard",
+        "remote server monitoring",
+        "server resources",
+        "cpu monitoring",
+        "memory usage",
+        "disk usage",
+        "uptime monitoring",
+        "zent",
+        "lumiraq",
+        "server dashboard",
+        "linux server monitor",
+        "container management"
+    ],
+    authors: [
+        {
+            name: "Lumiraq Team"
+        }
+    ],
+    creator: "Lumiraq",
+    openGraph: {
+        type: "website",
+        title: "ZENT | Server Monitoring & Docker Management",
+        description: "Real-time server monitoring and Docker container management via SSH. Built by Lumiraq.",
+        siteName: "ZENT",
+        locale: "en_US"
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "ZENT | Server Monitoring & Docker Management",
+        description: "Real-time server monitoring and Docker container management via SSH. Built by Lumiraq."
+    },
+    robots: {
+        index: true,
+        follow: true
+    }
 };
 function RootLayout({ children }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("html", {
@@ -83,12 +125,12 @@ function RootLayout({ children }) {
             children: children
         }, void 0, false, {
             fileName: "[project]/app/layout.tsx",
-            lineNumber: 27,
+            lineNumber: 68,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/layout.tsx",
-        lineNumber: 26,
+        lineNumber: 67,
         columnNumber: 5
     }, this);
 }
