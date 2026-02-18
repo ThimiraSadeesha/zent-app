@@ -1,0 +1,49 @@
+name: zent-pipeline
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+
+jobs:
+
+  # 🔹 PR Build (Check Docker build)
+  build-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image name
+        run: echo "IMAGE_NAME=zent-ui-pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
+      - name: Build Docker image for PR
+        run: |
+          docker build -f Dockerfile.build -t $IMAGE_NAME .
+
+      - name: Cleanup PR image
+        run: |
+          docker rmi $IMAGE_NAME || true
+
+
+  # 🔹 Production Deploy
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose down
+          docker compose build --no-cache
+          docker compose up -d
+
+      - name: Cleanup unused Docker images
+        run: |
+          docker image prune -af || true
