@@ -58,7 +58,8 @@ const Dashboard = () => {
 
     const handleLogout = async () => {
         await fetch("/api/server/logout");
-        router.push("/");
+        // Hard redirect clears client state — back button will trigger middleware check
+        window.location.href = "/";
     };
 
     const handleContainerAction = async (action: "start" | "stop" | "restart", id: string) => {
@@ -78,31 +79,22 @@ const Dashboard = () => {
             {/* Background */}
             <div className="fixed inset-0 bg-neutral-950 z-0" />
             <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-neutral-950 to-neutral-950 z-0" />
-            <BackgroundBeams className="opacity-20 z-0" />
+            <BackgroundBeams />
 
             <div className="relative z-10 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center backdrop-blur-md bg-neutral-900/30 p-4 rounded-2xl border border-neutral-800/50 sticky top-4 z-50">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <span className="font-bold text-white">Z</span>
-                        </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
-                            ZENT
-                        </h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <button onClick={fetchData} className="p-2 hover:bg-neutral-800 rounded-lg transition-colors">
-                            <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-medium"
-                        >
-                            Logout
-                        </button>
-                    </div>
+                {/* Floating Action Buttons - Top Right */}
+                <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+                    <button onClick={fetchData} className="p-2.5 backdrop-blur-md bg-neutral-900/60 hover:bg-neutral-800/80 rounded-xl border border-neutral-800/50 transition-all hover:scale-105 active:scale-95">
+                        <RefreshCw size={18} className={loading ? "animate-spin text-neutral-400" : "text-neutral-400"} />
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="px-4 py-2.5 rounded-xl backdrop-blur-md bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-medium"
+                    >
+                        Logout
+                    </button>
                 </div>
+
 
                 {/* System Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -116,7 +108,11 @@ const Dashboard = () => {
                             </div>
                             <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg border border-neutral-800/50">
                                 <span className="text-neutral-400 text-xs uppercase tracking-wider">Uptime</span>
-                                <span className="text-purple-400 font-mono text-xs font-bold shadow-purple-500/20 drop-shadow-sm">{stats?.uptime || "—"}</span>
+                                <span className="text-purple-400 font-mono text-xs font-bold shadow-purple-500/20 drop-shadow-sm">
+                                    {stats?.uptime
+                                        ? stats.uptime.split(",").slice(0, 2).join(",")
+                                        : "—"}
+                                </span>
                             </div>
                         </div>
                     </div>

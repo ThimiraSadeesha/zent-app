@@ -54,12 +54,16 @@ export function BackgroundBeamsDemo() {
         setConnecting(true);
 
         try {
-            const response = await serverAPI.login({
+            // Security: Encode payload to hide checks in network tab
+            // This is visual obfuscation, not encryption (requires HTTPS for true security)
+            const payload = btoa(JSON.stringify({
                 host: form.host,
                 username: form.username,
                 password: form.password,
                 port: portNum,
-            });
+            }));
+
+            const response = await serverAPI.login({ payload });
             showNotification("success", "Connected successfully!");
             router.push("/dashboard");
         } catch (err: any) {

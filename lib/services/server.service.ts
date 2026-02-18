@@ -1,5 +1,5 @@
-import {APIRequestResources} from "@/lib/api/class/enums";
-import {APIRequest} from "@/lib/api/class/api-request";
+import { APIRequestResources } from "@/lib/api/class/enums";
+import { APIRequest } from "@/lib/api/class/api-request";
 
 
 export class ServerService extends APIRequest {
@@ -7,13 +7,8 @@ export class ServerService extends APIRequest {
         super(APIRequestResources.SERVER);
     }
 
-    login(payload: {
-        host: string;
-        username: string;
-        password: string;
-        port: number;
-    }) {
-        return this.post(payload, {
+    login(body: any) {
+        return this.post(body, {
             endpoint: "login",
         });
     }

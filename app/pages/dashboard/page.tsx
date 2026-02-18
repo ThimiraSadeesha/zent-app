@@ -32,11 +32,10 @@ const Dashboard = () => {
     const [showAllContainers, setShowAllContainers] = useState(false);
 
     const fetchData = async () => {
-        // Fetch handled by SSE stream
+
     };
 
     useEffect(() => {
-        // SSE for Real-time System Stats & Docker
         const eventSource = new EventSource("/api/server/stream-stats");
 
         eventSource.onopen = () => {
@@ -68,7 +67,7 @@ const Dashboard = () => {
 
     const handleLogout = async () => {
         await fetch("/api/server/logout");
-        router.push("/login"); // Assuming login page exists
+        window.location.href = "/login";
     };
 
     const handleContainerAction = async (action: "start" | "stop" | "restart", id: string) => {
@@ -96,20 +95,16 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen w-full relative overflow-x-hidden antialiased text-neutral-200 font-sans">
-            {/* Background */}
             <div className="fixed inset-0 bg-neutral-950 z-0" />
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-neutral-950 to-neutral-950 z-0" />
-            <BackgroundBeams className="opacity-20 z-0" />
-
+            <BackgroundBeams />
             <div className="relative z-10 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center backdrop-blur-md bg-neutral-900/30 p-4 rounded-2xl border border-neutral-800/50 sticky top-4 z-50">
+                <div className="flex justify-between items-center backdrop-blur-md bg-neutral-900/80 p-4 rounded-2xl border border-neutral-800 sticky top-4 z-50">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center">
                             <span className="font-bold text-white">Z</span>
                         </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
-                            ZENT
+                        <h1 className="text-2xl font-bold text-neutral-100">
+                            Z E N T
                         </h1>
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
                             <span className="relative flex h-2 w-2">
@@ -125,7 +120,7 @@ const Dashboard = () => {
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-medium"
+                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-all text-sm font-medium"
                         >
                             Logout
                         </button>
@@ -134,16 +129,42 @@ const Dashboard = () => {
 
                 {/* System Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800 backdrop-blur-sm">
-                        <p className="text-neutral-500 text-sm font-medium">Server Info</p>
-                        <div className="mt-2 space-y-1">
-                            <div className="flex justify-between items-center">
-                                <span className="text-neutral-400 text-xs">User</span>
+                    <div className="p-6 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+                        <p className="text-neutral-400 text-sm font-medium">Server Info</p>
+                        <div className="mt-4 space-y-3">
+                            <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
+                                <span className="text-neutral-500 text-sm">User</span>
                                 <span className="text-neutral-200 font-mono text-sm">{stats?.user || "—"}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-neutral-400 text-xs">Uptime</span>
-                                <span className="text-neutral-200 font-mono text-xs">{stats?.uptime || "—"}</span>
+                                <span className="text-neutral-500 text-sm">Uptime</span>
+                                <span className="text-neutral-200 font-mono text-xs">
+                                    {(() => {
+                                        if (!stats?.uptime) return "—";
+                                        const timeStr = stats.uptime;
+
+                                        const years = timeStr.match(/(\d+)\s*year/);
+                                        const months = timeStr.match(/(\d+)\s*month/);
+                                        const weeks = timeStr.match(/(\d+)\s*week/);
+                                        const days = timeStr.match(/(\d+)\s*day/);
+                                        const hours = timeStr.match(/(\d+)\s*hour/);
+                                        const minutes = timeStr.match(/(\d+)\s*minute/);
+
+                                        let formatted = [];
+                                        if (years) formatted.push(`${years[1]}y`);
+                                        if (months) formatted.push(`${months[1]}m`);
+                                        if (weeks) formatted.push(`${weeks[1]}w`);
+                                        if (days) formatted.push(`${days[1]}d`);
+
+                                        if (formatted.length === 0) {
+                                            if (hours) formatted.push(`${hours[1]}h`);
+                                            if (minutes) formatted.push(`${minutes[1]}m`);
+                                            if (formatted.length === 0) return timeStr;
+                                        }
+
+                                        return formatted.join(" ");
+                                    })()}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -224,6 +245,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            <BackgroundBeams />
         </div>
     );
 };
