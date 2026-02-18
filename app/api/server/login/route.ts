@@ -22,10 +22,12 @@ export async function POST(request: Request) {
         const { host, username, password, port } = data;
         const sessionData = JSON.stringify({ host, username, password, port });
 
+        const isSecure = request.headers.get('x-forwarded-proto') === 'https' || request.url.startsWith('https');
+
         const cookieStore = await cookies();
         cookieStore.set('zent_session', sessionData, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isSecure,
             sameSite: 'strict',
             path: '/',
             maxAge: 60 * 60 * 24,

@@ -10,7 +10,6 @@ on:
 
 jobs:
 
-  # 🔹 PR Build (Check Docker build)
   build-pr:
     if: github.event_name == 'pull_request'
     runs-on: self-hosted
@@ -29,8 +28,6 @@ jobs:
         run: |
           docker rmi $IMAGE_NAME || true
 
-
-  # 🔹 Production Deploy
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
@@ -38,9 +35,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Ensure old containers are removed
+        run: |
+          # Stop and remove zent-app if it exists
+          if docker ps -a --format '{{.Names}}' | grep -q '^zent-app$'; then
+            echo "Removing existing zent-app container..."
+            docker rm -f zent-app
+          fi
+
       - name: Deploy with Docker Compose
         run: |
-          docker compose down
+          docker compose down --remove-orphans
           docker compose build --no-cache
           docker compose up -d
 
