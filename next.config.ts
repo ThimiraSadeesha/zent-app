@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+    allowedDevOrigins: ["192.168.23.207"],
+    serverExternalPackages: ["ssh2"],
     turbopack: {
         root: path.resolve(__dirname),
     },
@@ -11,18 +13,24 @@ const nextConfig: NextConfig = {
                 source: "/:path*",
                 headers: [
                     {
-                        key: "Access-Control-Allow-Origin",
-                        value: process.env.NODE_ENV === "development"
-                            ? "http://127.0.0.1:3000"
-                            : "https://zent.lumiraq.com",
+                        key: "X-Content-Type-Options",
+                        value: "nosniff",
                     },
                     {
-                        key: "Access-Control-Allow-Methods",
-                        value: "GET, POST, PUT, DELETE, OPTIONS",
+                        key: "X-Frame-Options",
+                        value: "DENY",
                     },
                     {
-                        key: "Access-Control-Allow-Headers",
-                        value: "Content-Type, Authorization",
+                        key: "Referrer-Policy",
+                        value: "strict-origin-when-cross-origin",
+                    },
+                    {
+                        key: "X-XSS-Protection",
+                        value: "1; mode=block",
+                    },
+                    {
+                        key: "Permissions-Policy",
+                        value: "camera=(), microphone=(), geolocation=()",
                     },
                 ],
             },
