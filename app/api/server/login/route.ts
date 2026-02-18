@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         cookieStore.set('zent_session', sessionData, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
             path: '/',
             maxAge: 60 * 60 * 24,
         });

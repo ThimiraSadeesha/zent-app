@@ -119,7 +119,7 @@ export function BackgroundBeamsDemo() {
                         real time.
                     </p>
 
-                    <div className="space-y-3" onKeyPress={handleKeyPress}>
+                    <div className="space-y-3" onKeyDown={handleKeyPress}>
                         <input
                             type="text"
                             name="host"

@@ -6,7 +6,12 @@ export async function GET() {
     try {
         const cookieStore = await cookies();
         const sessionToParse = cookieStore.get('zent_session')?.value;
-        const session = sessionToParse ? JSON.parse(sessionToParse) : undefined;
+
+        if (!sessionToParse) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const session = JSON.parse(sessionToParse);
 
         const cmd = `
       free -m | grep Mem | awk '{print $2,$3}';
@@ -49,7 +54,7 @@ export async function GET() {
             uptime,
             user,
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: 'Failed to fetch stats', details: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
     }
 }
