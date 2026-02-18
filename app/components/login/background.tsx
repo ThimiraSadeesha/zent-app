@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { BackgroundBeams } from "@/app/components/background/background-beams";
 import { useRouter } from "next/navigation";
-import { serverAPI } from "@/lib/services/server.service";
+
 import { Loading } from "@/app/components/shared/loading/loading";
 import { Notification } from "@/app/components/shared/notification/notification";
 
@@ -11,13 +11,12 @@ export function BackgroundBeamsDemo() {
     const router = useRouter();
     const [connecting, setConnecting] = useState(false);
     const [form, setForm] = useState({
-        host: "15.235.146.250",
-        username: "rocky",
-        password: "Imp@svr@9898",
+        host: "",
+        username: "",
+        password: "",
         port: "22",
     });
 
-    // Notification state
     const [notification, setNotification] = useState({
         isVisible: false,
         type: "success" as "success" | "error" | "warning",
@@ -54,8 +53,6 @@ export function BackgroundBeamsDemo() {
         setConnecting(true);
 
         try {
-            // Security: Encode payload to hide checks in network tab
-            // This is visual obfuscation, not encryption (requires HTTPS for true security)
             const payload = btoa(JSON.stringify({
                 host: form.host,
                 username: form.username,
@@ -63,7 +60,17 @@ export function BackgroundBeamsDemo() {
                 port: portNum,
             }));
 
-            const response = await serverAPI.login({ payload });
+            const response = await fetch("/api/server/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ payload }),
+            });
+
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error || "Failed to connect");
+            }
+
             showNotification("success", "Connected successfully!");
             router.push("/dashboard");
         } catch (err: any) {
@@ -71,13 +78,12 @@ export function BackgroundBeamsDemo() {
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to connect to server";
-
             showNotification("error", errorMessage);
         } finally {
-            // ✅ Always stop loading
             setConnecting(false);
         }
     };
+
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleLogin();
@@ -91,10 +97,8 @@ export function BackgroundBeamsDemo() {
 
     return (
         <>
-            {/* Loading Overlay */}
             <Loading isLoading={connecting} message="Connecting to server..." />
 
-            {/* Notification */}
             <Notification
                 type={notification.type}
                 message={notification.message}
@@ -103,7 +107,6 @@ export function BackgroundBeamsDemo() {
             />
 
             <div className="h-screen w-full relative overflow-hidden flex items-start justify-end antialiased">
-                {/* Background layers */}
                 <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-900 to-indigo-950" />
                 <div className="absolute inset-0 bg-black/60" />
 

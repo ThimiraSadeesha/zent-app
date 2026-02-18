@@ -1,12 +1,11 @@
 "use client";
 
 import DockerContainerCard from "@/app/components/docker/docker-container";
-import { BackgroundBeams } from "../components/background/background-beams";
+import { BackgroundBeams } from "@/app/components/background/background-beams";
 import SystemResourceCard from "@/app/components/server/server-resouse";
 import { useEffect, useState } from "react";
-import { dockerService } from "@/lib/services/docker.service";
+
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface SystemStats {
     cpu: { usage: number };
@@ -25,7 +24,6 @@ interface Container {
 }
 
 const Dashboard = () => {
-    const router = useRouter();
     const [stats, setStats] = useState<SystemStats | null>(null);
     const [containers, setContainers] = useState<Container[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,12 +32,10 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const [statsRes, containersRes] = await Promise.all([
+            const [statsRes, conts] = await Promise.all([
                 fetch("/api/server/stats").then((res) => res.json()),
-                dockerService.getStats().catch(() => [])
+                fetch("/api/docker/containers").then((res) => res.json()),
             ]);
-
-            const conts = await fetch("/api/docker/containers").then(res => res.json());
 
             setStats(statsRes);
             setContainers(Array.isArray(conts) ? conts : []);
@@ -52,19 +48,22 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 5000); // Poll every 5s
+        const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, []);
 
     const handleLogout = async () => {
         await fetch("/api/server/logout");
-        // Hard redirect clears client state — back button will trigger middleware check
         window.location.href = "/";
     };
 
     const handleContainerAction = async (action: "start" | "stop" | "restart", id: string) => {
         try {
-            await (dockerService[`${action}Container` as "startContainer" | "stopContainer" | "restartContainer"])(id);
+            await fetch("/api/docker/containers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, containerId: id }),
+            });
             setTimeout(fetchData, 1000);
         } catch (error) {
             console.error(`Failed to ${action} container`, error);
@@ -76,13 +75,11 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen w-full relative overflow-x-hidden antialiased text-neutral-200 font-sans">
-            {/* Background */}
             <div className="fixed inset-0 bg-neutral-950 z-0" />
             <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-neutral-950 to-neutral-950 z-0" />
             <BackgroundBeams />
 
             <div className="relative z-10 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-                {/* Floating Action Buttons - Top Right */}
                 <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
                     <button onClick={fetchData} className="p-2.5 backdrop-blur-md bg-neutral-900/60 hover:bg-neutral-800/80 rounded-xl border border-neutral-800/50 transition-all hover:scale-105 active:scale-95">
                         <RefreshCw size={18} className={loading ? "animate-spin text-neutral-400" : "text-neutral-400"} />
@@ -95,8 +92,6 @@ const Dashboard = () => {
                     </button>
                 </div>
 
-
-                {/* System Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800 backdrop-blur-sm shadow-xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -122,9 +117,7 @@ const Dashboard = () => {
                     <SystemResourceCard title="Disk Usage" usage={stats?.disk ? parseInt(stats.disk.percent) : 0} />
                 </div>
 
-                {/* Main Content Area */}
                 <div className="grid grid-cols-1 gap-6">
-                    {/* Docker Toggle */}
                     <div className="flex justify-end">
                         <button
                             onClick={() => setIsDockerVisible(!isDockerVisible)}
@@ -135,7 +128,6 @@ const Dashboard = () => {
                         </button>
                     </div>
 
-                    {/* Docker Section */}
                     {isDockerVisible && (
                         <div className="rounded-3xl bg-neutral-900/40 border border-neutral-800/50 backdrop-blur-md overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="p-6 border-b border-neutral-800/50 flex justify-between items-center bg-neutral-900/50">
@@ -149,7 +141,6 @@ const Dashboard = () => {
                             </div>
 
                             <div className="p-6 space-y-4">
-                                {/* Running (Priority) */}
                                 {runningContainers.length > 0 && (
                                     <div className="space-y-3">
                                         <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest ml-1 opacity-70">Running</h3>
@@ -169,8 +160,7 @@ const Dashboard = () => {
                                     </div>
                                 )}
 
-                                {/* Stopped Containers */}
-                                {(otherContainers.length > 0) && (
+                                {otherContainers.length > 0 && (
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-4 my-2">
                                             <div className="h-px flex-1 bg-neutral-800/50" />

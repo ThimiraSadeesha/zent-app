@@ -8,20 +8,6 @@ export async function GET() {
         const sessionToParse = cookieStore.get('zent_session')?.value;
         const session = sessionToParse ? JSON.parse(sessionToParse) : undefined;
 
-        // Execute multiple commands to get stats
-        // CPU Load (using top -bn1 is tricky due to delay, using /proc/loadavg for simplicity or vmstat)
-        // Actually, accurate CPU % often represents "CPU usage since last sampling", which requires two samples.
-        // A simple approximation is `grep 'cpu ' /proc/stat` and parsing userspace/system time.
-        // Or simpler: `top -bn1 | grep "Cpu(s)"`
-
-        // Commands:
-        // 1. Memory: free -m
-        // 2. Disk: df -h /
-        // 3. Uptime: uptime -p
-        // 4. Whoami: whoami
-        // 5. CPU: top -bn1 | grep "Cpu(s)" || echo "Cpu(s): 0.0 us" (fallback)
-
-        // We can chain them or run separate generic execs. Chaining reduces SSH overhead.
         const cmd = `
       free -m | grep Mem | awk '{print $2,$3}';
       df -h / | tail -1 | awk '{print $2,$3,$5}';
@@ -33,7 +19,6 @@ export async function GET() {
         const output = await executeCommand(cmd, session);
         const lines = output.split('\n').filter(line => line.trim() !== '');
 
-        // Default values
         let totalMem = 0, usedMem = 0;
         let totalDisk = '0G', usedDisk = '0G', diskPercent = '0%';
         let uptime = 'Unknown';
@@ -62,11 +47,9 @@ export async function GET() {
             memory: { total: totalMem, used: usedMem, usage: totalMem > 0 ? (usedMem / totalMem) * 100 : 0 },
             disk: { total: totalDisk, used: usedDisk, percent: diskPercent },
             uptime,
-            user
+            user,
         });
-
     } catch (error: any) {
-        console.error('Error fetching system stats:', error);
         return NextResponse.json({ error: 'Failed to fetch stats', details: error.message }, { status: 500 });
     }
 }
