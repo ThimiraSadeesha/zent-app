@@ -72,38 +72,49 @@ var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$g
 ;
 ;
 const metadata = {
-    title: "ZENT | Server Monitoring & Docker Management",
-    description: "Monitor server resources, manage Docker containers, and control remote servers via SSH in real time. A lightweight server management dashboard by Lumiraq.",
+    metadataBase: new URL("https://zent.lumiraq.com"),
+    title: {
+        default: "ZENT | Server Monitoring & Docker Management Dashboard",
+        template: "%s | ZENT by Lumiraq"
+    },
+    description: "Monitor server resources, manage Docker containers, and control remote Linux servers via SSH in real time. A lightweight open-source server management dashboard by Lumiraq.",
     keywords: [
         "server monitoring",
+        "server monitor",
         "docker management",
-        "SSH management",
-        "server manager",
-        "monitor server",
+        "docker container manager",
+        "SSH server management",
         "manage docker containers",
         "docker dashboard",
         "remote server monitoring",
-        "server resources",
+        "linux server monitor",
+        "server resources dashboard",
         "cpu monitoring",
-        "memory usage",
-        "disk usage",
+        "memory usage monitor",
+        "disk usage tracker",
         "uptime monitoring",
+        "container management tool",
+        "real-time server stats",
+        "server management tool",
         "zent",
         "lumiraq",
-        "server dashboard",
-        "linux server monitor",
-        "container management"
+        "zent dashboard"
     ],
     authors: [
         {
-            name: "Lumiraq Team"
+            name: "Lumiraq Team",
+            url: "https://lumiraq.com"
         }
     ],
     creator: "Lumiraq",
+    publisher: "Lumiraq",
+    applicationName: "ZENT",
+    category: "Technology",
     openGraph: {
         type: "website",
-        title: "ZENT | Server Monitoring & Docker Management",
-        description: "Real-time server monitoring and Docker container management via SSH. Built by Lumiraq.",
+        url: "https://zent.lumiraq.com",
+        title: "ZENT | Server Monitoring & Docker Management Dashboard",
+        description: "Real-time server monitoring and Docker container management via SSH. A lightweight dashboard by Lumiraq.",
         siteName: "ZENT",
         locale: "en_US"
     },
@@ -114,23 +125,48 @@ const metadata = {
     },
     robots: {
         index: true,
-        follow: true
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-snippet": -1,
+            "max-image-preview": "large"
+        }
+    },
+    alternates: {
+        canonical: "https://zent.lumiraq.com"
     }
 };
 function RootLayout({ children }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("html", {
         lang: "en",
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
-            className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_a71539c9$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} ${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_mono_8d43a2aa$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} antialiased`,
-            children: children
-        }, void 0, false, {
-            fileName: "[project]/app/layout.tsx",
-            lineNumber: 68,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("head", {
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("link", {
+                    rel: "canonical",
+                    href: "https://zent.lumiraq.com"
+                }, void 0, false, {
+                    fileName: "[project]/app/layout.tsx",
+                    lineNumber: 88,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/app/layout.tsx",
+                lineNumber: 87,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
+                className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_a71539c9$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} ${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_mono_8d43a2aa$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} antialiased`,
+                children: children
+            }, void 0, false, {
+                fileName: "[project]/app/layout.tsx",
+                lineNumber: 90,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/app/layout.tsx",
-        lineNumber: 67,
+        lineNumber: 86,
         columnNumber: 5
     }, this);
 }

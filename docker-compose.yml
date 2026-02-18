@@ -1,5 +1,5 @@
 services:
-  zent-ui:
+  zent-app:
     container_name: zent-app
     build:
       context: .

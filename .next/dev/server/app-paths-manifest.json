@@ -1,5 +1,5 @@
 {
   "/api/docker/containers/route": "app/api/docker/containers/route.js",
   "/api/server/stats/route": "app/api/server/stats/route.js",
-  "/page": "app/page.js"
+  "/dashboard/page": "app/dashboard/page.js"
 }
