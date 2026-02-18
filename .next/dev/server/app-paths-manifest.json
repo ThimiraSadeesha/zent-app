@@ -1,5 +1,10 @@
 {
-  "/dashboard/docker/page": "app/dashboard/docker/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/docker/containers/route": "app/api/docker/containers/route.js",
+  "/api/docker/stats/route": "app/api/docker/stats/route.js",
+  "/api/server/login/route": "app/api/server/login/route.js",
+  "/api/server/logout/route": "app/api/server/logout/route.js",
+  "/api/server/stats/route": "app/api/server/stats/route.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/page": "app/page.js"
 }

@@ -1,359 +1,214 @@
 "use client";
 
+import DockerContainerCard from "@/app/components/docker/docker-container";
+import { BackgroundBeams } from "../components/background/background-beams";
 import SystemResourceCard from "@/app/components/server/server-resouse";
-import SystemInfoCard from "@/app/components/dashboard/system-info-card";
-import CollapsibleSection from "@/app/components/ui/collapsible-section";
-import DockerDetailCard from "@/app/components/docker/docker-detail-card";
-import { BackgroundBeams } from "@/app/components/background/background-beams";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { serverAPI } from "@/lib/services/server.service";
+import { useEffect, useState } from "react";
 import { dockerService } from "@/lib/services/docker.service";
-import { Loading } from "@/app/components/shared/loading/loading";
-import { Notification } from "@/app/components/shared/notification/notification";
+import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+interface SystemStats {
+    cpu: { usage: number };
+    memory: { total: number; used: number; usage: number };
+    disk: { total: string; used: string; percent: string };
+    uptime: string;
+    user: string;
+}
+
+interface Container {
+    ID: string;
+    Names: string;
+    Image: string;
+    State: string;
+    Status: string;
+}
 
 const Dashboard = () => {
     const router = useRouter();
+    const [stats, setStats] = useState<SystemStats | null>(null);
+    const [containers, setContainers] = useState<Container[]>([]);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [notification, setNotification] = useState({
-        isVisible: false,
-        type: "success" as "success" | "error" | "warning",
-        message: "",
-    });
+    const [showAllContainers, setShowAllContainers] = useState(false);
+    const [isDockerVisible, setIsDockerVisible] = useState(false);
 
-    const [systemData, setSystemData] = useState({
-        ram: {
-            used_mb: "0",
-            total_mb: "0",
-            percent: "0"
-        },
-        disk: {
-            used: "0G",
-            total: "0G",
-            percent: "0"
-        },
-        cpu: {
-            percent: "0"
-        },
-        threads: {
-            count: "0"
-        },
-        uptime: {
-            uptime: "Loading..."
-        },
-        os: {
-            name: "Loading",
-            version: ""
-        }
-    });
-
-    const [dockerData, setDockerData] = useState({
-        docker_installed: false,
-        total_containers: 0,
-        running_containers: 0,
-        containers: [] as any[]
-    });
-
-    const showNotification = (
-        type: "success" | "error" | "warning",
-        message: string
-    ) => {
-        setNotification({ isVisible: true, type, message });
-    };
-
-    const closeNotification = () => {
-        setNotification({ ...notification, isVisible: false });
-    };
-
-    // Fetch system stats
-    const fetchSystemStats = async () => {
+    const fetchData = async () => {
         try {
-            const storedInfo = localStorage.getItem("serverInfo");
-            if (storedInfo) {
-                const serverInfo = JSON.parse(storedInfo);
-                if (serverInfo.data) {
-                    setSystemData(serverInfo.data);
-                } else if (serverInfo) {
-                    setSystemData(serverInfo);
-                }
-            }
-            // Then fetch fresh data from API (this will update the display)
-            // You can call your backend endpoint here if you have one for refreshing
-            // const response = await serverAPI.getStats();
-            // if (response?.data?.data) {
-            //     setSystemData(response.data.data);
-            //     localStorage.setItem("serverInfo", JSON.stringify(response.data));
-            // }
-        } catch (err: any) {
-            console.error("Failed to fetch system stats:", err);
-            showNotification("error", "Failed to load system statistics");
+            const [statsRes, containersRes] = await Promise.all([
+                fetch("/api/server/stats").then((res) => res.json()),
+                dockerService.getStats().catch(() => [])
+            ]);
+
+            const conts = await fetch("/api/docker/containers").then(res => res.json());
+
+            setStats(statsRes);
+            setContainers(Array.isArray(conts) ? conts : []);
+        } catch (error) {
+            console.error("Failed to fetch data", error);
+        } finally {
+            setLoading(false);
         }
     };
-
-    // Fetch Docker stats
-    const fetchDockerStats = async () => {
-        try {
-            const response = await dockerService.getStats();
-            if (response.status === 200) {
-                setDockerData(response.data);
-            } else if (response?.data) {
-                setDockerData(response.data);
-            }
-        } catch (err: any) {
-            console.error("Failed to fetch Docker stats:", err);
-            showNotification("error", "Failed to load Docker statistics");
-        }
-    };
-
-    // Initial data load
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                await Promise.all([
-                    fetchSystemStats(),
-                    fetchDockerStats()
-                ]);
-            } catch (err) {
-                showNotification("error", "Failed to load dashboard data");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, []);
-
 
     useEffect(() => {
-        const interval = setInterval(async () => {
-            setRefreshing(true);
-            try {
-                await Promise.all([
-                    fetchSystemStats(),
-                    fetchDockerStats()
-                ]);
-            } catch (err) {
-                console.error("Auto-refresh failed:", err);
-            } finally {
-                setRefreshing(false);
-            }
-        }, 30000);
-
+        fetchData();
+        const interval = setInterval(fetchData, 5000); // Poll every 5s
         return () => clearInterval(interval);
     }, []);
 
     const handleLogout = async () => {
+        await fetch("/api/server/logout");
+        router.push("/");
+    };
+
+    const handleContainerAction = async (action: "start" | "stop" | "restart", id: string) => {
         try {
-            await serverAPI.logout();
-            localStorage.removeItem("serverInfo"); // Clear stored data
-            showNotification("success", "Logged out successfully");
-            setTimeout(() => {
-                router.push("/");
-            }, 1000);
-        } catch (err: any) {
-            showNotification("error", "Logout failed");
-            localStorage.removeItem("serverInfo"); // Clear anyway
-            // Navigate anyway after a short delay
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
+            await (dockerService[`${action}Container` as "startContainer" | "stopContainer" | "restartContainer"])(id);
+            setTimeout(fetchData, 1000);
+        } catch (error) {
+            console.error(`Failed to ${action} container`, error);
         }
     };
 
-    const handleStart = async (containerName: string) => {
-        try {
-            setRefreshing(true);
-            await dockerService.startContainer(containerName);
-            showNotification("success", `Container "${containerName}" started successfully`);
-            await fetchDockerStats();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Failed to start container";
-            showNotification("error", errorMessage);
-        } finally {
-            setRefreshing(false);
-        }
-    };
-
-    const handleStop = async (containerName: string) => {
-        try {
-            setRefreshing(true);
-            await dockerService.stopContainer(containerName);
-            showNotification("success", `Container "${containerName}" stopped successfully`);
-            await fetchDockerStats();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Failed to stop container";
-            showNotification("error", errorMessage);
-        } finally {
-            setRefreshing(false);
-        }
-    };
-
-    const handleRestart = async (containerName: string) => {
-        try {
-            setRefreshing(true);
-            await dockerService.restartContainer(containerName);
-            showNotification("success", `Container "${containerName}" restarted successfully`);
-            await fetchDockerStats();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Failed to restart container";
-            showNotification("error", errorMessage);
-        } finally {
-            setRefreshing(false);
-        }
-    };
-
-    const handleRefresh = async () => {
-        setRefreshing(true);
-        try {
-            await Promise.all([
-                fetchSystemStats(),
-                fetchDockerStats()
-            ]);
-            showNotification("success", "Data refreshed successfully");
-        } catch (err) {
-            showNotification("error", "Failed to refresh data");
-        } finally {
-            setRefreshing(false);
-        }
-    };
-
-    if (loading) {
-        return <Loading isLoading={true} message="Loading dashboard..." />;
-    }
+    const runningContainers = containers.filter(c => c.State === "running");
+    const otherContainers = containers.filter(c => c.State !== "running");
 
     return (
-        <>
-            <Loading isLoading={refreshing} message="Refreshing data..." />
+        <div className="min-h-screen w-full relative overflow-x-hidden antialiased text-neutral-200 font-sans">
+            {/* Background */}
+            <div className="fixed inset-0 bg-neutral-950 z-0" />
+            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-neutral-950 to-neutral-950 z-0" />
+            <BackgroundBeams className="opacity-20 z-0" />
 
-            <Notification
-                type={notification.type}
-                message={notification.message}
-                isVisible={notification.isVisible}
-                onClose={closeNotification}
-            />
-
-            <div className="min-h-screen w-full relative overflow-hidden antialiased">
-                {/* Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-900 to-indigo-950" />
-                <div className="absolute inset-0 bg-black/60" />
-
-                <div className="relative z-10 min-h-screen p-6">
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
-                                Z E N T
-                            </h1>
-                            <p className="text-neutral-400 mt-2">Monitor your server resources and containers in real-time</p>
+            <div className="relative z-10 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+                {/* Header */}
+                <div className="flex justify-between items-center backdrop-blur-md bg-neutral-900/30 p-4 rounded-2xl border border-neutral-800/50 sticky top-4 z-50">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <span className="font-bold text-white">Z</span>
                         </div>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={handleRefresh}
-                                disabled={refreshing}
-                                className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-200 hover:bg-neutral-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {refreshing ? "Refreshing..." : "Refresh"}
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
-                            >
-                                Logout
-                            </button>
-                        </div>
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
+                            ZENT
+                        </h1>
                     </div>
-
-                    {/* System Resources */}
-                    <div className="mb-8">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <SystemResourceCard
-                                title="RAM"
-                                usage={parseFloat(systemData.ram.percent)}
-                                used={`${systemData.ram.used_mb}MB`}
-                                total={`${systemData.ram.total_mb}MB`}
-                            />
-                            <SystemResourceCard
-                                title="Disk"
-                                usage={parseInt(systemData.disk.percent)}
-                                used={systemData.disk.used}
-                                total={systemData.disk.total}
-                            />
-                            <SystemResourceCard
-                                title="CPU"
-                                usage={parseFloat(systemData.cpu.percent)}
-                            />
-                        </div>
+                    <div className="flex items-center gap-4">
+                        <button onClick={fetchData} className="p-2 hover:bg-neutral-800 rounded-lg transition-colors">
+                            <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-medium"
+                        >
+                            Logout
+                        </button>
                     </div>
-
-                    <div className="mb-8">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <SystemInfoCard
-                                title="Operating System"
-                                value={`${systemData.os.name} ${systemData.os.version}`}
-                                icon="💻"
-                            />
-                            <SystemInfoCard
-                                title="Uptime & Load"
-                                value={systemData.uptime.uptime}
-                                icon="⏱️"
-                            />
-                            <SystemInfoCard
-                                title="Threads"
-                                value={`${systemData.threads.count} threads`}
-                                icon="🧵"
-                            />
-                        </div>
-                    </div>
-
-                    <CollapsibleSection
-                        title="Docker"
-                        icon="🐳"
-                        badge={`${dockerData.running_containers} / ${dockerData.total_containers} Running`}
-                        defaultExpanded={true}
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div className="p-4 rounded-lg bg-neutral-800/50">
-                                <p className="text-neutral-400 text-sm">Docker Status</p>
-                                <p className={`text-xl font-semibold mt-1 ${dockerData.docker_installed ? "text-teal-500" : "text-red-500"}`}>
-                                    {dockerData.docker_installed ? "Installed ✓" : "Not Installed"}
-                                </p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-neutral-800/50">
-                                <p className="text-neutral-400 text-sm">Total Containers</p>
-                                <p className="text-xl font-semibold mt-1 text-neutral-200">{dockerData.total_containers}</p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-neutral-800/50">
-                                <p className="text-neutral-400 text-sm">Running Containers</p>
-                                <p className="text-xl font-semibold mt-1 text-green-500">{dockerData.running_containers}</p>
-                            </div>
-                        </div>
-
-                        {dockerData.containers.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                {dockerData.containers.map((container) => (
-                                    <DockerDetailCard
-                                        key={container.name}
-                                        {...container}
-                                        onStart={() => handleStart(container.name)}
-                                        onStop={() => handleStop(container.name)}
-                                        onRestart={() => handleRestart(container.name)}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12 text-neutral-400">
-                                <p className="text-lg">No containers found</p>
-                                <p className="text-sm mt-2">Docker containers will appear here once they are created</p>
-                            </div>
-                        )}
-                    </CollapsibleSection>
                 </div>
 
-                <BackgroundBeams />
+                {/* System Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800 backdrop-blur-sm shadow-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <p className="text-neutral-500 text-sm font-medium relative z-10">Server Info</p>
+                        <div className="mt-4 space-y-3 relative z-10">
+                            <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg border border-neutral-800/50">
+                                <span className="text-neutral-400 text-xs uppercase tracking-wider">User</span>
+                                <span className="text-indigo-400 font-mono text-sm font-bold shadow-indigo-500/20 drop-shadow-sm">{stats?.user || "—"}</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg border border-neutral-800/50">
+                                <span className="text-neutral-400 text-xs uppercase tracking-wider">Uptime</span>
+                                <span className="text-purple-400 font-mono text-xs font-bold shadow-purple-500/20 drop-shadow-sm">{stats?.uptime || "—"}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <SystemResourceCard title="CPU Usage" usage={Math.round(stats?.cpu?.usage || 0)} />
+                    <SystemResourceCard title="Memory Usage" usage={Math.round(stats?.memory?.usage || 0)} />
+                    <SystemResourceCard title="Disk Usage" usage={stats?.disk ? parseInt(stats.disk.percent) : 0} />
+                </div>
+
+                {/* Main Content Area */}
+                <div className="grid grid-cols-1 gap-6">
+                    {/* Docker Toggle */}
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setIsDockerVisible(!isDockerVisible)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/50 border border-neutral-800/50 hover:bg-neutral-800/50 hover:border-neutral-700 transition-all text-sm text-neutral-400 hover:text-neutral-200"
+                        >
+                            {isDockerVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            {isDockerVisible ? "Hide Docker Containers" : "Manage Docker Containers"}
+                        </button>
+                    </div>
+
+                    {/* Docker Section */}
+                    {isDockerVisible && (
+                        <div className="rounded-3xl bg-neutral-900/40 border border-neutral-800/50 backdrop-blur-md overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="p-6 border-b border-neutral-800/50 flex justify-between items-center bg-neutral-900/50">
+                                <h2 className="text-xl font-semibold text-neutral-200 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                                    Docker Containers
+                                </h2>
+                                <span className="px-3 py-1 rounded-full bg-neutral-800 text-neutral-400 text-xs font-medium border border-neutral-700">
+                                    {containers.length} Total
+                                </span>
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                {/* Running (Priority) */}
+                                {runningContainers.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest ml-1 opacity-70">Running</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {runningContainers.map((container) => (
+                                                <DockerContainerCard
+                                                    key={container.ID}
+                                                    id={container.ID}
+                                                    name={container.Names}
+                                                    image={container.Image}
+                                                    status={container.Status}
+                                                    state={container.State}
+                                                    onAction={handleContainerAction}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Stopped Containers */}
+                                {(otherContainers.length > 0) && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-4 my-2">
+                                            <div className="h-px flex-1 bg-neutral-800/50" />
+                                            <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">Stopped</span>
+                                            <div className="h-px flex-1 bg-neutral-800/50" />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {otherContainers.map((container) => (
+                                                <DockerContainerCard
+                                                    key={container.ID}
+                                                    id={container.ID}
+                                                    name={container.Names}
+                                                    image={container.Image}
+                                                    status={container.Status}
+                                                    state={container.State}
+                                                    onAction={handleContainerAction}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {containers.length === 0 && !loading && (
+                                    <div className="text-center py-12 text-neutral-500">
+                                        No containers found.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

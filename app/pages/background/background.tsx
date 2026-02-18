@@ -11,9 +11,9 @@ export function BackgroundBeamsDemo() {
     const router = useRouter();
     const [connecting, setConnecting] = useState(false);
     const [form, setForm] = useState({
-        host: "",
-        username: " ",
-        password: " ",
+        host: "15.235.146.250",
+        username: "rocky",
+        password: "Imp@svr@9898",
         port: "22",
     });
 
@@ -60,16 +60,8 @@ export function BackgroundBeamsDemo() {
                 password: form.password,
                 port: portNum,
             });
-            if (response?.status === 200) {
-                const serverInfo = response.data;
-                localStorage.setItem("serverInfo", JSON.stringify(serverInfo));
-
-                showNotification("success", "Connected successfully!");
-
-                router.push("/dashboard");
-            } else {
-                throw new Error("Server connection failed");
-            }
+            showNotification("success", "Connected successfully!");
+            router.push("/dashboard");
         } catch (err: any) {
             const errorMessage =
                 err?.response?.data?.message ||

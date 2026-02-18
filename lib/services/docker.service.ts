@@ -1,5 +1,5 @@
-import {APIRequestResources} from "@/lib/api/class/enums";
-import {APIRequest} from "@/lib/api/class/api-request";
+import { APIRequestResources } from "@/lib/api/class/enums";
+import { APIRequest } from "@/lib/api/class/api-request";
 
 export class DockerService extends APIRequest {
     constructor() {
@@ -12,37 +12,22 @@ export class DockerService extends APIRequest {
 
     startContainer(containerName: string) {
         return this.post(
-            {},
-            {
-                endpoint: "start",
-                params: {
-                    container_name: containerName,
-                },
-            }
+            { action: "start", containerId: containerName },
+            { endpoint: "containers" }
         );
     }
 
     stopContainer(containerName: string) {
         return this.post(
-            {},
-            {
-                endpoint: "stop",
-                params: {
-                    container_name: containerName,
-                },
-            }
+            { action: "stop", containerId: containerName },
+            { endpoint: "containers" }
         );
     }
 
     restartContainer(containerName: string) {
         return this.post(
-            {},
-            {
-                endpoint: "restart",
-                params: {
-                    container_name: containerName,
-                },
-            }
+            { action: "restart", containerId: containerName },
+            { endpoint: "containers" }
         );
     }
 }
