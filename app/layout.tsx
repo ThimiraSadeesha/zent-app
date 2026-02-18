@@ -13,36 +13,46 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZENT | Server Monitoring & Docker Management",
+  metadataBase: new URL("https://zent.lumiraq.com"),
+  title: {
+    default: "ZENT | Server Monitoring & Docker Management Dashboard",
+    template: "%s | ZENT by Lumiraq",
+  },
   description:
-    "Monitor server resources, manage Docker containers, and control remote servers via SSH in real time. A lightweight server management dashboard by Lumiraq.",
+    "Monitor server resources, manage Docker containers, and control remote Linux servers via SSH in real time. A lightweight open-source server management dashboard by Lumiraq.",
   keywords: [
     "server monitoring",
+    "server monitor",
     "docker management",
-    "SSH management",
-    "server manager",
-    "monitor server",
+    "docker container manager",
+    "SSH server management",
     "manage docker containers",
     "docker dashboard",
     "remote server monitoring",
-    "server resources",
+    "linux server monitor",
+    "server resources dashboard",
     "cpu monitoring",
-    "memory usage",
-    "disk usage",
+    "memory usage monitor",
+    "disk usage tracker",
     "uptime monitoring",
+    "container management tool",
+    "real-time server stats",
+    "server management tool",
     "zent",
     "lumiraq",
-    "server dashboard",
-    "linux server monitor",
-    "container management",
+    "zent dashboard",
   ],
-  authors: [{ name: "Lumiraq Team" }],
+  authors: [{ name: "Lumiraq Team", url: "https://lumiraq.com" }],
   creator: "Lumiraq",
+  publisher: "Lumiraq",
+  applicationName: "ZENT",
+  category: "Technology",
   openGraph: {
     type: "website",
-    title: "ZENT | Server Monitoring & Docker Management",
+    url: "https://zent.lumiraq.com",
+    title: "ZENT | Server Monitoring & Docker Management Dashboard",
     description:
-      "Real-time server monitoring and Docker container management via SSH. Built by Lumiraq.",
+      "Real-time server monitoring and Docker container management via SSH. A lightweight dashboard by Lumiraq.",
     siteName: "ZENT",
     locale: "en_US",
   },
@@ -55,6 +65,15 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+    },
+  },
+  alternates: {
+    canonical: "https://zent.lumiraq.com",
   },
 };
 
@@ -65,6 +84,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="canonical" href="https://zent.lumiraq.com" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
