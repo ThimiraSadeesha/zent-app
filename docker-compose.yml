@@ -1,6 +1,6 @@
 services:
   zent-ui:
-    container_name: zent-ui
+    container_name: zent-app
     build:
       context: .
       dockerfile: Dockerfile
