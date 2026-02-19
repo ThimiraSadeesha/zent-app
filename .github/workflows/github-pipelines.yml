@@ -35,20 +35,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ensure old containers are removed
+      - name: Build Docker image
         run: |
-          # Stop and remove zent-app if it exists
-          if docker ps -a --format '{{.Names}}' | grep -q '^zent-app$'; then
-            echo "Removing existing zent-app container..."
-            docker rm -f zent-app
-          fi
+          docker build -t zent-app .
 
-      - name: Deploy with Docker Compose
+      - name: Remove old containers
         run: |
-          docker compose down --remove-orphans
-          docker compose build --no-cache
-          docker compose up -d
+          docker rm -f zent-app-1 zent-app-2 zent-app-3 || true
 
-      - name: Cleanup unused Docker images
+      - name: Run 3 instances
+        run: |
+          docker run -d -p 3001:3000 --name zent-app-1 --restart unless-stopped zent-app
+          docker run -d -p 3002:3000 --name zent-app-2 --restart unless-stopped zent-app
+          docker run -d -p 3003:3000 --name zent-app-3 --restart unless-stopped zent-app
+
+      - name: Cleanup unused images
         run: |
           docker image prune -af || true
