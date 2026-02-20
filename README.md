@@ -13,9 +13,7 @@
 </p>
 
 ---
-
 ## Overview
-
 Zent is a lightweight web dashboard that connects to remote Linux servers via **SSH** and provides real-time system monitoring and Docker container management — all through an elegant, animated UI. Every API request and response is encrypted end-to-end using **AES-256-GCM**, ensuring credentials and telemetry never travel in plaintext.
 
 ---
