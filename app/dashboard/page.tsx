@@ -5,7 +5,7 @@ import { BackgroundBeams } from "@/app/components/background/background-beams";
 import SystemResourceCard from "@/app/components/server/server-resouse";
 import { useEffect, useState } from "react";
 
-import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, FileText, X } from "lucide-react";
 
 interface SystemStats {
     cpu: { usage: number };
@@ -29,6 +29,12 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showAllContainers, setShowAllContainers] = useState(false);
     const [isDockerVisible, setIsDockerVisible] = useState(false);
+    
+    // Log Viewer State
+    const [selectedLogContainerId, setSelectedLogContainerId] = useState<string | null>(null);
+    const [logData, setLogData] = useState<string>("");
+    const [logLoading, setLogLoading] = useState(false);
+    const [autoRefreshLogs, setAutoRefreshLogs] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -52,6 +58,35 @@ const Dashboard = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const fetchLogs = async (containerId: string) => {
+        if (!containerId) return;
+        setLogLoading(true);
+        try {
+            const res = await fetch(`/api/docker/containers/logs?containerId=${containerId}`);
+            const data = await res.json();
+            if (data.logs !== undefined) {
+                setLogData(data.logs);
+            } else {
+                setLogData("Failed to load logs or container has no logs.");
+            }
+        } catch (error) {
+            console.error("Failed to fetch logs", error);
+            setLogData("Error fetching logs.");
+        } finally {
+            setLogLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        let logInterval: NodeJS.Timeout;
+        if (autoRefreshLogs && selectedLogContainerId) {
+            logInterval = setInterval(() => {
+                fetchLogs(selectedLogContainerId);
+            }, 3000);
+        }
+        return () => clearInterval(logInterval);
+    }, [autoRefreshLogs, selectedLogContainerId]);
+
     const handleLogout = async () => {
         await fetch("/api/server/logout");
         window.location.href = "/";
@@ -68,6 +103,12 @@ const Dashboard = () => {
         } catch (error) {
             console.error(`Failed to ${action} container`, error);
         }
+    };
+
+    const handleViewLogs = (id: string, name: string) => {
+        setLogData("");
+        setSelectedLogContainerId(id);
+        fetchLogs(id);
     };
 
     const runningContainers = containers.filter(c => c.State === "running");
@@ -154,6 +195,7 @@ const Dashboard = () => {
                                                     status={container.Status}
                                                     state={container.State}
                                                     onAction={handleContainerAction}
+                                                    onViewLogs={handleViewLogs}
                                                 />
                                             ))}
                                         </div>
@@ -194,6 +236,81 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
+
+            {/* Log Viewer Modal */}
+            {selectedLogContainerId && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-neutral-950 border border-neutral-800 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden relative">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border-b border-neutral-800 bg-neutral-900/50 gap-4">
+                            <div className="flex items-center gap-4">
+                                <h3 className="text-lg font-semibold text-neutral-200 flex items-center gap-2 whitespace-nowrap">
+                                    <FileText size={18} className="text-blue-400" />
+                                    Container Logs
+                                </h3>
+                                
+                                <select 
+                                    className="bg-neutral-800 border border-neutral-700 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-blue-500 text-neutral-300 w-full md:w-auto"
+                                    value={selectedLogContainerId}
+                                    onChange={(e) => {
+                                        setLogData("");
+                                        setSelectedLogContainerId(e.target.value);
+                                        fetchLogs(e.target.value);
+                                    }}
+                                >
+                                    {runningContainers.map(c => (
+                                        <option key={c.ID} value={c.ID}>{c.Names}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="flex items-center gap-3 self-end md:self-auto">
+                                <label className="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer hover:text-neutral-200 transition">
+                                    <input 
+                                        type="checkbox" 
+                                        className="rounded border-neutral-700 bg-neutral-900 text-blue-500 focus:ring-1 focus:ring-blue-500 focus:ring-offset-0 focus:ring-offset-neutral-900"
+                                        checked={autoRefreshLogs}
+                                        onChange={(e) => setAutoRefreshLogs(e.target.checked)}
+                                    />
+                                    Auto-refresh (3s)
+                                </label>
+                                
+                                <button 
+                                    onClick={() => fetchLogs(selectedLogContainerId)}
+                                    className="p-1.5 rounded-lg bg-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 transition"
+                                    title="Refresh logs"
+                                >
+                                    <RefreshCw size={16} className={logLoading ? "animate-spin text-blue-400" : ""} />
+                                </button>
+
+                                <div className="w-px h-6 bg-neutral-800 mx-1"></div>
+
+                                <button 
+                                    onClick={() => {
+                                        setSelectedLogContainerId(null);
+                                        setAutoRefreshLogs(false);
+                                    }}
+                                    className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition"
+                                    title="Close"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 bg-[#0c0c0c] overflow-y-auto p-4 font-mono text-xs md:text-sm leading-relaxed text-neutral-300 whitespace-pre-wrap break-all relative">
+                            {logLoading && !logData && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#0c0c0c]/80 backdrop-blur-sm z-10">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <RefreshCw size={24} className="animate-spin text-blue-500" />
+                                        <span className="text-neutral-400">Fetching logs...</span>
+                                    </div>
+                                </div>
+                            )}
+                            {logData || "No logs available."}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

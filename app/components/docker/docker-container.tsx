@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Play, Square, RotateCw } from "lucide-react";
+import { Play, Square, RotateCw, FileText } from "lucide-react";
 
 interface DockerContainerProps {
     id: string;
@@ -8,9 +8,10 @@ interface DockerContainerProps {
     status: string;
     state: string;
     onAction: (action: "start" | "stop" | "restart", id: string) => Promise<void>;
+    onViewLogs?: (id: string, name: string) => void;
 }
 
-const DockerContainerCard: React.FC<DockerContainerProps> = ({ id, name, image, status, state, onAction }) => {
+const DockerContainerCard: React.FC<DockerContainerProps> = ({ id, name, image, status, state, onAction, onViewLogs }) => {
     const [loading, setLoading] = useState(false);
     const isRunning = state === "running";
 
@@ -55,6 +56,13 @@ const DockerContainerCard: React.FC<DockerContainerProps> = ({ id, name, image, 
                         <Square size={16} />
                     </button>
                 )}
+                <button
+                    onClick={() => onViewLogs && onViewLogs(id, name)}
+                    className="p-2 rounded-md bg-neutral-500/10 text-neutral-400 hover:bg-neutral-500/20 hover:text-neutral-200 transition"
+                    title="View Logs"
+                >
+                    <FileText size={16} />
+                </button>
                 <button
                     onClick={() => handleAction("restart")}
                     disabled={loading}
